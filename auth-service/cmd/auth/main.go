@@ -1,5 +1,7 @@
 package main
 
-func main() {
+import "auth-service/internal/app"
 
+func main() {
+	app.Run()
 }
