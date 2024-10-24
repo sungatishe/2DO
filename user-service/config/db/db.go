@@ -4,6 +4,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"os"
+	"user-service/internal/models"
 )
 
 var DB *gorm.DB
@@ -15,5 +16,5 @@ func InitDB() {
 	if err != nil {
 		panic("Failed to connect db ")
 	}
-	//DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&models.User{})
 }

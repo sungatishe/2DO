@@ -3,20 +3,24 @@ package service
 import (
 	"auth-service/internal/models"
 	"auth-service/internal/proto"
+	"auth-service/internal/rabbitmq/events"
 	"auth-service/internal/repository"
 	"auth-service/internal/utils"
 	"context"
 	"errors"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 type AuthService struct {
-	repo repository.AuthRepository
+	repo    repository.AuthRepository
+	channel *amqp.Channel
 	proto.UnimplementedAuthServiceServer
 }
 
-func NewAuthService(repo repository.AuthRepository) *AuthService {
-	authService := &AuthService{repo: repo}
+func NewAuthService(repo repository.AuthRepository, channel *amqp.Channel) proto.AuthServiceServer {
+	authService := &AuthService{repo: repo, channel: channel}
 	return authService
 }
 
@@ -52,6 +56,18 @@ func (a *AuthService) Register(ctx context.Context, req *proto.RegisterRequest) 
 
 	err = a.repo.RegisterUser(user)
 	if err != nil {
+		return nil, err
+	}
+
+	event := events.UserRegisteredEvent{
+		UserID:   user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	}
+
+	err = events.PublishUserRegisteredEvent(a.channel, event)
+	if err != nil {
+		log.Printf("Failed to publish user registred event: %s", err)
 		return nil, err
 	}
 

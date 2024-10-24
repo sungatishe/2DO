@@ -47,6 +47,8 @@ services:
     depends_on:
       auth-db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - mynetwork
     ports:
@@ -62,6 +64,8 @@ services:
       - ../user-service/.env
     depends_on:
       user-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - mynetwork
@@ -84,6 +88,24 @@ services:
     ports:
       - "8080:8080"
     restart: unless-stopped
+
+
+  rabbitmq:
+    image: rabbitmq:3-management  # Официальный образ RabbitMQ с Management Plugin
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # Порт для приложений RabbitMQ
+      - "15672:15672"  # Порт для веб-интерфейса управления
+    environment:
+      RABBITMQ_DEFAULT_USER: guest  # Установите пользователя по умолчанию
+      RABBITMQ_DEFAULT_PASS: guest  # Установите пароль по умолчанию
+    networks:
+      - mynetwork
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmqctl ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 
 volumes:

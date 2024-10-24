@@ -2,6 +2,7 @@ package app
 
 import (
 	"auth-service/config/db"
+	"auth-service/config/rabbitmq"
 	"auth-service/internal/proto"
 	"auth-service/internal/repository"
 	"auth-service/internal/service"
@@ -14,6 +15,32 @@ import (
 func Run() {
 	db.InitDb()
 
+	conn, err := rabbitmq.ConnectRabbitMQ()
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
+	}
+	defer conn.Close()
+
+	// Открытие канала RabbitMQ
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Failed to open a channel: %s", err)
+	}
+	defer ch.Close()
+
+	// Убедимся, что очередь "userQueue" существует
+	_, err = ch.QueueDeclare(
+		"userQueue", // name
+		true,        // durable
+		false,       // delete when unused
+		false,       // exclusive
+		false,       // no-wait
+		nil,         // arguments
+	)
+	if err != nil {
+		log.Fatalf("Failed to declare a queue: %s", err)
+	}
+
 	authRepo := repository.NewAuthRepository(db.Db)
 
 	lis, err := net.Listen("tcp", ":50051")
@@ -22,7 +49,7 @@ func Run() {
 	}
 
 	grpcServer := grpc.NewServer()
-	userService := service.NewAuthService(authRepo)
+	userService := service.NewAuthService(authRepo, ch)
 	proto.RegisterAuthServiceServer(grpcServer, userService)
 
 	fmt.Println("Auth service is running on port :50051")
