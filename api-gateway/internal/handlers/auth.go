@@ -69,3 +69,22 @@ func (a *AuthHandlers) Login(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
+
+func (a *AuthHandlers) Logout(rw http.ResponseWriter, r *http.Request) {
+	// Устанавливаем cookie с истекшим сроком действия
+	http.SetCookie(rw, &http.Cookie{
+		Name:     "jwt_token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   true,                    // Только для HTTPS, false во время разработки
+		SameSite: http.SameSiteStrictMode, // Защита от CSRF
+		Path:     "/",
+		Expires:  time.Unix(0, 0), // Установка времени жизни токена в прошедшее время
+	})
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	if _, err := rw.Write([]byte(`{"message":"Logout successful"}`)); err != nil {
+		http.Error(rw, "Failed to write response", http.StatusInternalServerError)
+	}
+}

@@ -13,9 +13,8 @@ import (
 // Ваш секретный ключ для подписи JWT
 var jwtSecret = []byte(os.Getenv("JWT_KEY"))
 
-// AuthMiddleware - middleware для аутентификации на основе JWT из куки
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
 		// Извлечение токена из куки
 		cookie, err := r.Cookie("jwt_token")
 		if err != nil {
@@ -55,5 +54,5 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(rw, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-	})
+	}
 }

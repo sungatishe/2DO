@@ -3,6 +3,7 @@ package handlers
 import (
 	"api-gateway/internal/client"
 	"api-gateway/internal/proto/user"
+	"api-gateway/pgk/utils"
 	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
@@ -42,10 +43,14 @@ func (u *UserHandlers) CreateUser(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandlers) GetUserById(rw http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+	id, err := utils.ExtractUserIdFromToken(r)
+	if err != nil || id == "" {
+		http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	userID, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		http.Error(rw, "Invalid request", http.StatusBadRequest)
+		http.Error(rw, "Invalid id", http.StatusBadRequest)
 		return
 	}
 

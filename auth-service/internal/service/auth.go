@@ -5,7 +5,7 @@ import (
 	"auth-service/internal/proto"
 	"auth-service/internal/rabbitmq/events"
 	"auth-service/internal/repository"
-	"auth-service/internal/utils"
+	"auth-service/pgk/utils"
 	"context"
 	"errors"
 	amqp "github.com/rabbitmq/amqp091-go"

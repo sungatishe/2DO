@@ -41,9 +41,11 @@ func ListenForUserRegisteredEvents(ch *amqp.Channel, repo repository.UserReposit
 
 func createUserInDatabase(event UserRegisteredEvent, repo repository.UserRepository) {
 	user := models.User{
-		Model:    gorm.Model{ID: event.UserID},
-		Username: event.Username,
-		Email:    event.Email,
+		Model:       gorm.Model{ID: event.UserID},
+		Username:    event.Username,
+		Email:       event.Email,
+		Description: event.Username,
+		Avatar:      "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png",
 	}
 
 	err := repo.CreateUser(&user)

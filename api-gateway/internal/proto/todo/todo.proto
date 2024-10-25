@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package todo;
+
+option go_package = "./proto";
+
+service TodoService {
+  // Create task
+  rpc CreateTodo (CreateTodoRequest) returns (CreateTodoResponse);
+  // Get task
+  rpc GetTodoById (GetTodosByIdRequest) returns (GetTodosByIdResponse);
+  // Update task
+  rpc UpdateTodo (UpdateTodoRequest) returns (UpdateTodoResponse);
+  // Delete task
+  rpc DeleteTodo (DeleteTodoRequest) returns (DeleteTodoResponse);
+  // Getting user's tasks
+  rpc ListTodo (ListTodoRequest) returns (ListTodoResponse);
+
+}
+
+message Todo {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  string title = 3;
+  string description = 4;
+  bool is_done = 5;
+  string deadline = 6;
+}
+
+message CreateTodoRequest {
+  uint64 user_id = 1;
+  string title = 2;
+  string description = 3;
+  bool is_done = 4;
+  string deadline = 5;
+}
+
+message CreateTodoResponse {
+  string message = 1;
+  Todo todo = 2;
+}
+
+message GetTodosByIdRequest {
+  uint64 id = 1;
+}
+
+message GetTodosByIdResponse {
+  Todo todo = 1;
+}
+
+message UpdateTodoRequest {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  string title = 3;
+  string description = 4;
+  bool is_done = 5;
+  string deadline = 6;
+}
+
+message UpdateTodoResponse {
+  Todo todo = 1;
+}
+
+message DeleteTodoRequest {
+  uint64 id = 1;
+}
+
+message DeleteTodoResponse {
+  string message = 1;
+}
+
+message ListTodoRequest {
+  uint64 user_id = 1;
+}
+
+message ListTodoResponse {
+  repeated Todo todos = 1;
+}
