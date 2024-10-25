@@ -1,14 +1,14 @@
 package client
 
 import (
-	"api-gateway/internal/proto"
+	"api-gateway/internal/proto/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
 )
 
 type AuthClient struct {
-	Client proto.AuthServiceClient
+	Client auth.AuthServiceClient
 }
 
 func NewAuthClient(address string) *AuthClient {
@@ -17,5 +17,5 @@ func NewAuthClient(address string) *AuthClient {
 		log.Fatalf("Did not connect: %v", err)
 	}
 
-	return &AuthClient{Client: proto.NewAuthServiceClient(conn)}
+	return &AuthClient{Client: auth.NewAuthServiceClient(conn)}
 }

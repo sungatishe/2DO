@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"api-gateway/internal/client"
-	"api-gateway/internal/proto"
+	"api-gateway/internal/proto/auth"
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 type AuthHandlers struct {
@@ -17,7 +18,7 @@ func NewAuthHandlers(authClient *client.AuthClient) *AuthHandlers {
 }
 
 func (a *AuthHandlers) Register(rw http.ResponseWriter, r *http.Request) {
-	var req proto.RegisterRequest
+	var req auth.RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(rw, "Invalid request", http.StatusBadRequest)
@@ -39,7 +40,7 @@ func (a *AuthHandlers) Register(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (a *AuthHandlers) Login(rw http.ResponseWriter, r *http.Request) {
-	var req proto.LoginRequest
+	var req auth.LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(rw, "Invalid request", http.StatusBadRequest)
@@ -51,6 +52,16 @@ func (a *AuthHandlers) Login(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	http.SetCookie(rw, &http.Cookie{
+		Name:     "jwt_token",
+		Value:    res.Token,
+		HttpOnly: true,                    // Ограничение доступа к cookie только на стороне сервера
+		Secure:   true,                    // Только для HTTPS-соединений (на время разработки может быть установлено в false)
+		SameSite: http.SameSiteStrictMode, // Предотвращение отправки cookie в кросс-сайтовых запросах
+		Path:     "/",
+		Expires:  time.Now().Add(24 * time.Hour), // Установка времени жизни токена (например, 24 часа)
+	})
 
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusOK)

@@ -1,42 +1,59 @@
 package middleware
 
 import (
-	"api-gateway/internal/client"
-	"api-gateway/internal/proto"
 	"context"
+	"fmt"
 	"net/http"
-	"strings"
+	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt"
 )
 
-func AuthMiddleware(authClient client.AuthClient) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				http.Error(w, "Authorization header required", http.StatusUnauthorized)
-				return
+// Ваш секретный ключ для подписи JWT
+var jwtSecret = []byte(os.Getenv("JWT_KEY"))
+
+// AuthMiddleware - middleware для аутентификации на основе JWT из куки
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		// Извлечение токена из куки
+		cookie, err := r.Cookie("jwt_token")
+		if err != nil {
+			http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		tokenStr := cookie.Value
+
+		// Проверка и декодирование JWT токена
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			// Проверка метода подписи токена
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
-
-			tokenParts := strings.Split(authHeader, " ")
-			if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-				http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
-				return
-			}
-
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-
-			res, err := authClient.Client.ValidateToken(ctx, &proto.ValidateTokenRequest{Token: tokenParts[1]})
-			if err != nil || !res.IsValid {
-				http.Error(w, "Invalid token", http.StatusUnauthorized)
-				return
-			}
-
-			ctx = context.WithValue(ctx, "userId", res.UserId)
-			r = r.WithContext(ctx)
-
-			next.ServeHTTP(w, r)
+			return jwtSecret, nil
 		})
-	}
+
+		if err != nil || !token.Valid {
+			http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Извлечение полезной нагрузки и передача данных пользователя в контекст запроса
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			// Проверка времени истечения токена
+			if exp, ok := claims["exp"].(float64); ok && time.Unix(int64(exp), 0).Before(time.Now()) {
+				http.Error(rw, "Token expired", http.StatusUnauthorized)
+				return
+			}
+
+			// Извлечение идентификатора пользователя из claims
+			userID := claims["sub"].(string) // Используем "sub" как идентификатор пользователя
+			ctx := context.WithValue(r.Context(), "user_id", userID)
+			next.ServeHTTP(rw, r.WithContext(ctx))
+		} else {
+			http.Error(rw, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+	})
 }
