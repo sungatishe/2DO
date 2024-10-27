@@ -14,10 +14,12 @@ func Run() {
 	authClient := client.NewAuthClient(os.Getenv("AUTH_SERVICE_URL"))
 	userClient := client.NewUserClient(os.Getenv("USER_SERVIwCE_URL"))
 	todoClient := client.NewTodoClient(os.Getenv("TODO_SERVICE_URL"))
+	pushClient := client.NewPushClient(os.Getenv("PUSH_SERVICE_URL"))
 
 	authHandler := handlers.NewAuthHandlers(authClient)
 	userHandler := handlers.NewUserHandlers(userClient)
 	todoHandlers := handlers.NewTodoHandlers(todoClient)
+	pushHandlers := handlers.NewPushHandlers(pushClient)
 
 	r := chi.NewRouter()
 
@@ -25,6 +27,7 @@ func Run() {
 	rt.SetupAuthRoutes(authHandler)
 	rt.SetupUserRoutes(userHandler)
 	rt.SetupTodoRoutes(todoHandlers)
+	rt.SetupPushRoutes(pushHandlers)
 
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {

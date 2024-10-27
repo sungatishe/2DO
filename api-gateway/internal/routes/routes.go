@@ -45,3 +45,7 @@ func (r *Routes) SetupTodoRoutes(todoHandlers *handlers.TodoHandlers) {
 	r.router.Put("/todo", middleware.AuthMiddleware(todoHandlers.UpdateTodo))
 	r.router.Delete("/todo/{id}", middleware.AuthMiddleware(todoHandlers.DeleteTodo))
 }
+
+func (r *Routes) SetupPushRoutes(pushHandler *handlers.PushHandlers) {
+	r.router.Get("/ws", middleware.AuthMiddleware(pushHandler.WebSocketHandler))
+}
