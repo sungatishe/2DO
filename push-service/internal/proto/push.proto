@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package push;
+
+option go_package = "./proto";
+
+service NotificationService {
+  rpc NotifyOnDeadlineCheck(DeadlineNotificationRequest) returns (DeadlineNotificationResponse);
+}
+
+
+message DeadlineNotification {
+  string id = 1;
+  string user_id = 2;
+  string title = 3;
+  string description = 4;
+  string deadline = 5;
+}
+
+message DeadlineNotificationRequest {}
+
+message DeadlineNotificationResponse {
+  repeated DeadlineNotification notifications = 1;
+}

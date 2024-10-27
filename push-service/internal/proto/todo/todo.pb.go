@@ -4,7 +4,7 @@
 // 	protoc        v5.28.2
 // source: todo.proto
 
-package proto
+package todo
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

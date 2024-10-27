@@ -107,7 +107,7 @@ func (s *todoService) ListTodo(ctx context.Context, req *proto.ListTodoRequest) 
 	var todoList []*proto.Todo
 	for _, todo := range todos {
 		todoList = append(todoList, &proto.Todo{
-			Id: 		uint64(todo.ID),
+			Id:          uint64(todo.ID),
 			UserId:      uint64(todo.UserID),
 			Title:       todo.Title,
 			Description: todo.Description,
@@ -117,4 +117,24 @@ func (s *todoService) ListTodo(ctx context.Context, req *proto.ListTodoRequest) 
 	}
 
 	return &proto.ListTodoResponse{Todos: todoList}, nil
+}
+
+func (s *todoService) GetTodosByDeadline(ctx context.Context, req *proto.GetTodosByDeadlineRequest) (*proto.GetTodosByDeadlineResponse, error) {
+	deadlineTime := time.Now().Add(12 * time.Hour).Format(time.RFC3339)
+	todos, err := s.repo.GetTodosByDeadline(deadlineTime)
+	if err != nil {
+		return nil, err
+	}
+	var todoList []*proto.Todo
+	for _, todo := range todos {
+		todoList = append(todoList, &proto.Todo{
+			Id:          uint64(todo.ID),
+			UserId:      uint64(todo.UserID),
+			Title:       todo.Title,
+			Description: todo.Description,
+			IsDone:      todo.IsDone,
+			Deadline:    todo.Deadline.Format(time.RFC3339),
+		})
+	}
+	return &proto.GetTodosByDeadlineResponse{Todos: todoList}, nil
 }

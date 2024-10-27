@@ -12,7 +12,7 @@ import (
 
 func Run() {
 	authClient := client.NewAuthClient(os.Getenv("AUTH_SERVICE_URL"))
-	userClient := client.NewUserClient(os.Getenv("USER_SERVICE_URL"))
+	userClient := client.NewUserClient(os.Getenv("USER_SERVIwCE_URL"))
 	todoClient := client.NewTodoClient(os.Getenv("TODO_SERVICE_URL"))
 
 	authHandler := handlers.NewAuthHandlers(authClient)

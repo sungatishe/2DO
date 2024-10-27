@@ -42,3 +42,12 @@ func (t *todoRepository) ListTodoByUserId(id uint) ([]models.Todo, error) {
 	}
 	return todos, nil
 }
+
+func (t *todoRepository) GetTodosByDeadline(deadline string) ([]models.Todo, error) {
+	var todos []models.Todo
+	err := t.db.Where("deadline = ?", deadline).Error
+	if err != nil {
+		return nil, err
+	}
+	return todos, nil
+}

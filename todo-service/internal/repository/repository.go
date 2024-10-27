@@ -8,4 +8,5 @@ type TodoRepository interface {
 	UpdateTodo(todo *models.Todo) error
 	DeleteTodoById(id uint) error
 	ListTodoByUserId(id uint) ([]models.Todo, error)
+	GetTodosByDeadline(deadline string) ([]models.Todo, error)
 }

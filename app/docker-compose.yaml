@@ -107,6 +107,19 @@ services:
       - "50053:50053"
     restart: unless-stopped
 
+
+  push-service:
+    build:
+      context: ../push-service
+    container_name: push-service
+    env_file:
+      - ../push-service/.env
+    networks:
+      - mynetwork
+    ports:
+      - "50054:50054"
+    restart: unless-stopped
+
   api-gateway:
     build:
       context: ../api-gateway
