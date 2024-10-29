@@ -47,6 +47,21 @@
         <button type="submit" class="btn btn-primary">Update Task</button>
       </form>
     </div>
+
+    <h3 class="mt-4">Deadlines 12 hours push</h3>
+    <div v-if="notifications.length" class="mt-3">
+      <ul class="list-group">
+        <li v-for="(notification, index) in notifications" :key="index" class="list-group-item">
+          <strong>{{ notification.title }}</strong> - {{ notification.description }}
+          <br />
+          <small>Deadline: {{ formatDate(notification.deadline) }}. There are less than 12 hours left before the deadline</small>
+        </li>
+      </ul>
+    </div>
+    <div v-else class="alert alert-info mt-3">
+      No upcoming deadline notifications.
+    </div>
+
   </div>
 </template>
 
@@ -62,10 +77,13 @@ export default {
       newTaskDeadline: '',
       editMode: false,
       currentTask: {},
+      notifications: [], // Массив для хранения уведомлений
+      ws: null // WebSocket-соединение
     };
   },
   async created() {
     await this.fetchTasks();
+    this.connectWebSocket();
   },
   methods: {
     async fetchTasks() {
@@ -150,7 +168,42 @@ export default {
       const date = new Date(dateString);
       return date.toLocaleString('en-GB', options).replace(',', ''); // Используем en-GB для нужного формата
     },
+    connectWebSocket() {
+      this.ws = new WebSocket(`ws://localhost:8080/ws`);
+
+      this.ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
+      this.ws.onmessage = (event) => {
+        const notification = JSON.parse(event.data);
+        console.log("Received notification:", notification);
+
+        // Проверка на уникальность уведомления по id
+        const exists = this.notifications.some(n => n.id === notification.id);
+        if (!exists) {
+          this.notifications.push(notification);
+          console.log("Notification added:", notification);
+        } else {
+          console.log("Duplicate notification ignored:", notification);
+        }
+      };
+
+      this.ws.onclose = () => {
+        console.log('WebSocket connection closed, reconnecting...');
+        setTimeout(this.connectWebSocket, 1000); // Попытка переподключения через 1 секунду
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    }
   },
+  beforeDestroy() {
+    if (this.ws) {
+      this.ws.close();
+    }
+  }
 };
 </script>
 

@@ -48,6 +48,8 @@ func (h *PushHandlers) WebSocketHandler(rw http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	log.Printf("Users push id: %v", id)
+
 	h.clientsMu.Lock()
 	h.clients[id] = conn
 	h.clientsMu.Unlock()
@@ -57,27 +59,35 @@ func (h *PushHandlers) WebSocketHandler(rw http.ResponseWriter, r *http.Request)
 
 func (h *PushHandlers) sendNotifications(userID string) {
 	for {
-		// Каждые 10 минут проверяем на дедлайны
-		time.Sleep(10 * time.Minute)
+		time.Sleep(20 * time.Minute)
+		log.Println("Push sent!!!")
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		// Получаем уведомления от push-service
 		resp, err := h.client.Client.NotifyOnDeadlineCheck(ctx, &proto.DeadlineNotificationRequest{})
 		if err != nil {
 			log.Printf("failed to get notifications: %v", err)
 			continue
 		}
 
+		log.Printf("Number of notifications received: %d", len(resp.Notifications))
+
 		// Отправляем уведомления пользователю через WebSocket
 		h.clientsMu.Lock()
 		clientConn, exists := h.clients[userID]
 		h.clientsMu.Unlock()
+		log.Println(exists)
 
 		if exists {
 			for _, notification := range resp.Notifications {
+				log.Printf("Received notification: %+v", notification) // Логируем каждое уведомление
+
 				if notification.UserId == userID {
+					log.Println("Sending notification to user:", userID)
+					log.Println("Notification Description:", notification.Description)
+					log.Println("Notification Deadline:", notification.Deadline)
+
 					err := clientConn.WriteJSON(notification)
 					if err != nil {
 						log.Printf("failed to send notification: %v", err)
@@ -86,6 +96,8 @@ func (h *PushHandlers) sendNotifications(userID string) {
 						delete(h.clients, userID)
 						h.clientsMu.Unlock()
 						break
+					} else {
+						log.Println("Notification sent successfully") // Логируем успешную отправку уведомления
 					}
 				}
 			}

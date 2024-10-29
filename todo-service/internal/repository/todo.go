@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gorm.io/gorm"
+	"time"
 	"todo-service/internal/models"
 )
 
@@ -45,7 +46,9 @@ func (t *todoRepository) ListTodoByUserId(id uint) ([]models.Todo, error) {
 
 func (t *todoRepository) GetTodosByDeadline(deadline string) ([]models.Todo, error) {
 	var todos []models.Todo
-	err := t.db.Where("deadline = ?", deadline).Error
+	deadlineTime, _ := time.Parse(time.RFC3339, deadline)
+	deadlineTime = deadlineTime.UTC()
+	err := t.db.Where("deadline <= ?", deadlineTime.Format(time.RFC3339)).Find(&todos).Error
 	if err != nil {
 		return nil, err
 	}

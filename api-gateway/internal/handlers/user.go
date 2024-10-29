@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -58,6 +59,7 @@ func (u *UserHandlers) GetUserById(rw http.ResponseWriter, r *http.Request) {
 
 	res, err := u.userClient.Client.GetUserById(context.Background(), req)
 	if err != nil {
+		log.Println(err)
 		http.Error(rw, "Failed to get user by id", http.StatusInternalServerError)
 		return
 	}
@@ -65,6 +67,7 @@ func (u *UserHandlers) GetUserById(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 
 	if err := json.NewEncoder(rw).Encode(res); err != nil {
+		log.Println(err)
 		http.Error(rw, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}

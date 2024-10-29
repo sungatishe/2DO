@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 	"time"
 	"todo-service/internal/models"
 	"todo-service/internal/proto/proto"
@@ -120,11 +121,12 @@ func (s *todoService) ListTodo(ctx context.Context, req *proto.ListTodoRequest) 
 }
 
 func (s *todoService) GetTodosByDeadline(ctx context.Context, req *proto.GetTodosByDeadlineRequest) (*proto.GetTodosByDeadlineResponse, error) {
-	deadlineTime := time.Now().Add(12 * time.Hour).Format(time.RFC3339)
-	todos, err := s.repo.GetTodosByDeadline(deadlineTime)
+	log.Printf("Fetching todos with deadline before: %s", req.Deadline)
+	todos, err := s.repo.GetTodosByDeadline(req.Deadline)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("Number of todos fetched: %d", len(todos))
 	var todoList []*proto.Todo
 	for _, todo := range todos {
 		todoList = append(todoList, &proto.Todo{
@@ -136,5 +138,6 @@ func (s *todoService) GetTodosByDeadline(ctx context.Context, req *proto.GetTodo
 			Deadline:    todo.Deadline.Format(time.RFC3339),
 		})
 	}
+	log.Printf("Number of notifications created: %d", len(todoList))
 	return &proto.GetTodosByDeadlineResponse{Todos: todoList}, nil
 }
