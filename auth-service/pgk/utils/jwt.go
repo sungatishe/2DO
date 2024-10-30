@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 	"os"
 	"strconv"
 	"time"
@@ -31,4 +32,12 @@ func ValidateJWT(tokenString string) (string, error) {
 	}
 
 	return claims.Subject, nil
+}
+
+func GenerateHashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 }

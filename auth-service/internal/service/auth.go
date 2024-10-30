@@ -14,18 +14,18 @@ import (
 )
 
 type AuthService struct {
-	repo    repository.AuthRepository
+	Repo    repository.AuthRepository
 	channel *amqp.Channel
 	proto.UnimplementedAuthServiceServer
 }
 
 func NewAuthService(repo repository.AuthRepository, channel *amqp.Channel) proto.AuthServiceServer {
-	authService := &AuthService{repo: repo, channel: channel}
+	authService := &AuthService{Repo: repo, channel: channel}
 	return authService
 }
 
 func (a *AuthService) Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
-	hashPassword, err := a.generateHashPassword(req.Password)
+	hashPassword, err := utils.GenerateHashPassword(req.Password)
 	if err != nil {
 		return nil, errors.New("error with create password hash")
 	}
@@ -36,7 +36,7 @@ func (a *AuthService) Register(ctx context.Context, req *proto.RegisterRequest) 
 		PasswordHash: hashPassword,
 	}
 
-	existingUser, err := a.repo.GetUserByEmail(user.Email)
+	existingUser, err := a.Repo.GetUserByEmail(user.Email)
 	if err != nil && !errors.Is(repository.ErrNotFound, err) {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (a *AuthService) Register(ctx context.Context, req *proto.RegisterRequest) 
 		return nil, errors.New("Email already taken")
 	}
 
-	existingUser, err = a.repo.GetUserByUsername(user.Username)
+	existingUser, err = a.Repo.GetUserByUsername(user.Username)
 	if err != nil && !errors.Is(repository.ErrNotFound, err) {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (a *AuthService) Register(ctx context.Context, req *proto.RegisterRequest) 
 		return nil, errors.New("Username already taken")
 	}
 
-	err = a.repo.RegisterUser(user)
+	err = a.Repo.RegisterUser(user)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (a *AuthService) Register(ctx context.Context, req *proto.RegisterRequest) 
 }
 
 func (a *AuthService) Login(ctx context.Context, req *proto.LoginRequest) (*proto.LoginResponse, error) {
-	user, err := a.repo.GetUserByEmail(req.Email)
+	user, err := a.Repo.GetUserByEmail(req.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -101,12 +101,4 @@ func (a *AuthService) ValidateToken(ctx context.Context, req *proto.ValidateToke
 	}
 
 	return &proto.ValidateTokenResponse{IsValid: true, UserId: userId}, nil
-}
-
-func (a *AuthService) generateHashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedPassword), nil
 }

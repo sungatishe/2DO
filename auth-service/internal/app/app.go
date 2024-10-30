@@ -2,6 +2,7 @@ package app
 
 import (
 	"auth-service/config/db"
+	"auth-service/config/logs"
 	"auth-service/config/rabbitmq"
 	"auth-service/internal/proto"
 	"auth-service/internal/repository"
@@ -14,6 +15,7 @@ import (
 
 func Run() {
 	db.InitDb()
+	logs.InitLogger()
 
 	conn, err := rabbitmq.ConnectRabbitMQ()
 	if err != nil {
