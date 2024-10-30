@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"push/config/cache"
 	"push/internal/client"
 	"push/internal/proto/proto"
 	"push/internal/service"
@@ -13,8 +14,9 @@ import (
 
 func Run() {
 	todoClient := client.NewTodoClient(os.Getenv("TODO_SERVICE_URL"))
+	redisClient := cache.NewRedisClient()
 
-	pushService := service.NewNotificationService(todoClient)
+	pushService := service.NewNotificationService(todoClient, redisClient)
 
 	lis, err := net.Listen("tcp", ":50054")
 	if err != nil {
