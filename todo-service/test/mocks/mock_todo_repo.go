@@ -30,11 +30,11 @@ func (m *MockTodoRepository) DeleteTodoById(id uint) error {
 }
 
 func (m *MockTodoRepository) ListTodoByUserId(id uint) ([]models.Todo, error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(id)
+	return args.Get(0).([]models.Todo), args.Error(1)
 }
 
 func (m *MockTodoRepository) GetTodosByDeadline(deadline string) ([]models.Todo, error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(deadline)
+	return args.Get(0).([]models.Todo), args.Error(1)
 }

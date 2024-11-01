@@ -2,20 +2,22 @@ package unit
 
 import (
 	"context"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
+	"testing"
 	"user-service/internal/models"
 	"user-service/internal/proto"
 	"user-service/internal/service"
 	"user-service/test/mocks"
 )
 
-func TestCreateUser(t *testing.T) {
-	mockRepo := new(mocks.MockUserRepository)
-	userService := service.NewUserService(mockRepo)
+type TestUserService struct {
+	mockRepo *mocks.MockUserRepository
+}
+
+func (u *TestUserService) TestCreateUser(t *testing.T) {
+	userService := service.NewUserService(u.mockRepo)
 
 	req := &proto.CreateUserRequest{
 		Username:    "test",
@@ -24,7 +26,7 @@ func TestCreateUser(t *testing.T) {
 		Description: "test",
 	}
 
-	mockRepo.On("CreateUser", mock.Anything).Return(nil)
+	u.mockRepo.On("CreateUser", mock.Anything).Return(nil)
 
 	resp, err := userService.CreateUser(context.Background(), req)
 
@@ -32,12 +34,11 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, "User created successfully", resp.Message)
 	assert.Equal(t, "test", resp.User.Username)
 
-	mockRepo.AssertExpectations(t)
+	u.mockRepo.AssertExpectations(t)
 }
 
-func TestGetUserById(t *testing.T) {
-	mockRepo := new(mocks.MockUserRepository)
-	userService := service.NewUserService(mockRepo)
+func (u *TestUserService) TestGetUserById(t *testing.T) {
+	userService := service.NewUserService(u.mockRepo)
 
 	user := models.User{
 		Model:       gorm.Model{ID: 1},
@@ -47,7 +48,7 @@ func TestGetUserById(t *testing.T) {
 		Description: "test",
 	}
 
-	mockRepo.On("GetUserById", uint64(user.ID)).Return(&user, nil)
+	u.mockRepo.On("GetUserById", uint64(user.ID)).Return(user, nil)
 
 	req := &proto.GetUserByIdRequest{UserId: 1}
 	resp, err := userService.GetUserById(context.Background(), req)
@@ -55,12 +56,11 @@ func TestGetUserById(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "test", resp.User.Username)
 
-	mockRepo.AssertExpectations(t)
+	u.mockRepo.AssertExpectations(t)
 }
 
-func TestUpdateUser(t *testing.T) {
-	mockRepo := new(mocks.MockUserRepository)
-	userService := service.NewUserService(mockRepo)
+func (u *TestUserService) TestUpdateUser(t *testing.T) {
+	userService := service.NewUserService(u.mockRepo)
 
 	user := models.User{
 		Model:       gorm.Model{ID: 1},
@@ -70,8 +70,8 @@ func TestUpdateUser(t *testing.T) {
 		Description: "test",
 	}
 
-	mockRepo.On("GetUserById", uint64(user.ID)).Return(&user, nil)
-	mockRepo.On("UpdateUser", &user).Return(nil)
+	u.mockRepo.On("GetUserById", uint64(user.ID)).Return(user, nil)
+	u.mockRepo.On("UpdateUser", user).Return(nil)
 
 	req := &proto.UpdateUserRequest{
 		UserId:      1,
@@ -86,14 +86,13 @@ func TestUpdateUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "User updated successfully", resp.Message)
 
-	mockRepo.AssertExpectations(t)
+	u.mockRepo.AssertExpectations(t)
 }
 
-func TestDeleteUser(t *testing.T) {
-	mockRepo := new(mocks.MockUserRepository)
-	userService := service.NewUserService(mockRepo)
+func (u *TestUserService) TestDeleteUser(t *testing.T) {
+	userService := service.NewUserService(u.mockRepo)
 
-	mockRepo.On("DeleteUserById", uint64(1)).Return(nil)
+	u.mockRepo.On("DeleteUserById", uint64(1)).Return(nil)
 
 	req := &proto.DeleteUserRequest{UserId: 1}
 	resp, err := userService.DeleteUser(context.Background(), req)
@@ -101,5 +100,5 @@ func TestDeleteUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "User deleted successfully", resp.Message)
 
-	mockRepo.AssertExpectations(t)
+	u.mockRepo.AssertExpectations(t)
 }
