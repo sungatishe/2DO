@@ -35,7 +35,7 @@ func (r *Routes) SetupUserRoutes(userHandlers *handlers.UserHandlers) {
 	r.router.Post("/user", middleware.AuthMiddleware(userHandlers.CreateUser))
 	r.router.Get("/user", middleware.AuthMiddleware(userHandlers.GetUserById))
 	r.router.Put("/user", middleware.AuthMiddleware(userHandlers.UpdateUser))
-	//r.router.Delete("/user/{id}", middleware.AuthMiddleware(userHandlers.DeleteUser))
+	r.router.Delete("/user/{id}", middleware.AuthMiddleware(userHandlers.DeleteUser))
 }
 
 func (r *Routes) SetupTodoRoutes(todoHandlers *handlers.TodoHandlers) {
