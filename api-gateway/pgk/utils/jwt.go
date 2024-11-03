@@ -6,7 +6,9 @@ import (
 	"os"
 )
 
-func ExtractUserIdFromToken(r *http.Request) (string, error) {
+var ExtractUserIdFromToken = extractUserIdFromTokenImpl
+
+func extractUserIdFromTokenImpl(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("jwt_token")
 	if err != nil {
 		return "", err

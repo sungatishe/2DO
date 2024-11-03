@@ -4,6 +4,7 @@ import (
 	"api-gateway/internal/client"
 	"api-gateway/internal/handlers"
 	"api-gateway/internal/proto/user"
+	"api-gateway/pgk/utils"
 	"api-gateway/test/mocks"
 	"bytes"
 	"encoding/json"
@@ -20,7 +21,7 @@ func setupTestRouter() (*chi.Mux, *mocks.MockUserClient) {
 	userHandlers := handlers.NewUserHandlers(&client.UserClient{Client: mockClient})
 	router := chi.NewRouter()
 	router.Post("/user", userHandlers.CreateUser)
-	router.Get("/user/{id}", userHandlers.GetUserById)
+	router.Get("/user", userHandlers.GetUserById)
 	router.Put("/user", userHandlers.UpdateUser)
 	router.Delete("/user/{id}", userHandlers.DeleteUser)
 	return router, mockClient
@@ -53,24 +54,31 @@ func TestCreateUser(t *testing.T) {
 	require.Equal(t, uint64(1), res.User.Id)
 }
 
-//func TestGetUserById(t *testing.T) {
-//	router, mockClient := setupTestRouter()
-//
-//	mockClient.On("GetUserById", mock.Anything, &user.GetUserByIdRequest{UserId: uint64(1)}).
-//		Return(&user.GetUserByIdResponse{User: &user.User{Username: "test"}}, nil)
-//
-//	req, _ := http.NewRequest("GET", "/user/1", nil)
-//	req.Header.Set("Authorization", "Bearer testtoken")
-//	rr := httptest.NewRecorder()
-//
-//	router.ServeHTTP(rr, req)
-//
-//	require.Equal(t, http.StatusOK, rr.Code)
-//	var res user.GetUserByIdResponse
-//	err := json.NewDecoder(rr.Body).Decode(&res)
-//	require.NoError(t, err)
-//	require.Equal(t, "test", res.User.Username)
-//}
+func TestGetUserById(t *testing.T) {
+	originalFunc := utils.ExtractUserIdFromToken
+	defer func() { utils.ExtractUserIdFromToken = originalFunc }()
+
+	utils.ExtractUserIdFromToken = func(r *http.Request) (string, error) {
+		return "1", nil
+	}
+
+	router, mockClient := setupTestRouter()
+
+	mockClient.On("GetUserById", mock.Anything, &user.GetUserByIdRequest{UserId: uint64(1)}).
+		Return(&user.GetUserByIdResponse{User: &user.User{Username: "test"}}, nil)
+
+	req, _ := http.NewRequest("GET", "/user", nil)
+	req.Header.Set("Authorization", "Bearer testtoken")
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusOK, rr.Code)
+	var res user.GetUserByIdResponse
+	err := json.NewDecoder(rr.Body).Decode(&res)
+	require.NoError(t, err)
+	require.Equal(t, "test", res.User.Username)
+}
 
 func TestUpdateUser(t *testing.T) {
 	router, mockClient := setupTestRouter()

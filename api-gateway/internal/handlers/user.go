@@ -64,7 +64,7 @@ func (u *UserHandlers) GetUserById(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusCreated)
+	rw.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(rw).Encode(res); err != nil {
 		log.Println(err)
