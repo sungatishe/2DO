@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func setupTestRouter() (*chi.Mux, *mocks.MockUserClient) {
+func setupUserTestRouter() (*chi.Mux, *mocks.MockUserClient) {
 	mockClient := &mocks.MockUserClient{}
 	userHandlers := handlers.NewUserHandlers(&client.UserClient{Client: mockClient})
 	router := chi.NewRouter()
@@ -28,7 +28,7 @@ func setupTestRouter() (*chi.Mux, *mocks.MockUserClient) {
 }
 
 func TestCreateUser(t *testing.T) {
-	router, mockClient := setupTestRouter()
+	router, mockClient := setupUserTestRouter()
 
 	mockClient.On("CreateUser", mock.Anything, mock.AnythingOfType("*user.CreateUserRequest")).
 		Return(&user.CreateUserResponse{
@@ -62,7 +62,7 @@ func TestGetUserById(t *testing.T) {
 		return "1", nil
 	}
 
-	router, mockClient := setupTestRouter()
+	router, mockClient := setupUserTestRouter()
 
 	mockClient.On("GetUserById", mock.Anything, &user.GetUserByIdRequest{UserId: uint64(1)}).
 		Return(&user.GetUserByIdResponse{User: &user.User{Username: "test"}}, nil)
@@ -81,7 +81,7 @@ func TestGetUserById(t *testing.T) {
 }
 
 func TestUpdateUser(t *testing.T) {
-	router, mockClient := setupTestRouter()
+	router, mockClient := setupUserTestRouter()
 
 	mockClient.On("UpdateUser", mock.Anything, &user.UpdateUserRequest{
 		UserId:      uint64(1),
@@ -111,7 +111,7 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	router, mockClient := setupTestRouter()
+	router, mockClient := setupUserTestRouter()
 
 	mockClient.On("DeleteUser", mock.Anything, &user.DeleteUserRequest{UserId: uint64(1)}).
 		Return(&user.DeleteUserResponse{Message: "User deleted successfully"}, nil)
