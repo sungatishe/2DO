@@ -2,7 +2,7 @@
   <div>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">MyApp</a>
+        <a class="navbar-brand" href="#">2DO!</a>
         <button
             class="navbar-toggler"
             type="button"

@@ -48,3 +48,6 @@ docker-compose.override.yml
 
 # Ignore specific directories (if applicable)
 # /path/to/ignored/directory/
+
+.idea/
+

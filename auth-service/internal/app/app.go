@@ -6,9 +6,13 @@ import (
 	"auth-service/config/rabbitmq"
 	"auth-service/internal/repository"
 	"auth-service/internal/server"
+	"auth-service/internal/service"
+	"os"
 )
 
 func Run() {
+	port := os.Getenv("PORT")
+
 	db.InitDb()
 	logs.InitLogger()
 
@@ -19,5 +23,10 @@ func Run() {
 	rabbitmq.DeclareQueue(ch, "userQueue")
 
 	authRepo := repository.NewAuthRepository(db.DB)
-	server.InitGRPCServer(":50051", ch, authRepo)
+	authService := service.NewAuthService(authRepo, ch)
+
+	authServer := server.NewAuthServer(authService)
+
+	authServer.Run(port)
+
 }
