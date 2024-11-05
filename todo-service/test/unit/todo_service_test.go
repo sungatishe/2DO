@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 	"testing"
 	"time"
 	"todo-service/internal/models"
@@ -40,7 +39,7 @@ func TestGetTodoById(t *testing.T) {
 	todoService := service.NewTodoService(mockRepo)
 
 	todo := &models.Todo{
-		Model:       gorm.Model{ID: 1},
+		ID:          1,
 		UserID:      1,
 		Title:       "title",
 		Description: "test",
@@ -64,7 +63,7 @@ func TestUpdateTodo(t *testing.T) {
 	todoService := service.NewTodoService(mockRepo)
 
 	todo := &models.Todo{
-		Model:       gorm.Model{ID: 1},
+		ID:          1,
 		UserID:      1,
 		Title:       "title",
 		Description: "test",
@@ -96,7 +95,7 @@ func TestDeleteTodo(t *testing.T) {
 	mockRepo := new(mocks.MockTodoRepository)
 	todoService := service.NewTodoService(mockRepo)
 
-	mockRepo.On("DeleteTodoById", uint(1)).Return(nil)
+	mockRepo.On("DeleteTodoById", uint64(1)).Return(nil)
 
 	req := &proto.DeleteTodoRequest{Id: 1}
 
@@ -114,7 +113,7 @@ func TestListTodo(t *testing.T) {
 
 	todos := []models.Todo{
 		{
-			Model:       gorm.Model{ID: 1},
+			ID:          1,
 			UserID:      1,
 			Title:       "title 1",
 			Description: "test 1",
@@ -122,7 +121,7 @@ func TestListTodo(t *testing.T) {
 			Deadline:    time.Now(),
 		},
 		{
-			Model:       gorm.Model{ID: 2},
+			ID:          2,
 			UserID:      1,
 			Title:       "title 2",
 			Description: "test 2",
@@ -131,7 +130,7 @@ func TestListTodo(t *testing.T) {
 		},
 	}
 
-	mockRepo.On("ListTodoByUserId", uint(1)).Return(todos, nil)
+	mockRepo.On("ListTodoByUserId", uint64(1)).Return(todos, nil)
 
 	req := &proto.ListTodoRequest{UserId: uint64(1)}
 
@@ -155,7 +154,7 @@ func TestGetTodosByDeadline(t *testing.T) {
 
 	todos := []models.Todo{
 		{
-			Model:       gorm.Model{ID: 1},
+			ID:          1,
 			UserID:      1,
 			Title:       "title 1",
 			Description: "test 1",
@@ -163,7 +162,7 @@ func TestGetTodosByDeadline(t *testing.T) {
 			Deadline:    time.Now().Add(24 * time.Hour),
 		},
 		{
-			Model:       gorm.Model{ID: 2},
+			ID:          2,
 			UserID:      1,
 			Title:       "title 2",
 			Description: "test 2",

@@ -3,7 +3,6 @@ package event
 import (
 	"encoding/json"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"gorm.io/gorm"
 	"log"
 	"user-service/internal/models"
 	"user-service/internal/repository"
@@ -41,7 +40,7 @@ func ListenForUserRegisteredEvents(ch *amqp.Channel, repo repository.UserReposit
 
 func createUserInDatabase(event UserRegisteredEvent, repo repository.UserRepository) {
 	user := models.User{
-		Model:       gorm.Model{ID: event.UserID},
+		ID:          uint64(event.UserID),
 		Username:    event.Username,
 		Email:       event.Email,
 		Description: event.Username,

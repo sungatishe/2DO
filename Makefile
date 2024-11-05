@@ -4,10 +4,12 @@ COMPOSE_FILES = -f $(COMPOSE_PATH)/docker-compose.yaml -f $(COMPOSE_PATH)/docker
 
 # Цели
 up:
-	docker-compose $(COMPOSE_FILES) up
+	docker-compose $(COMPOSE_FILES) up &
+	cd frontend && npm run dev
 
 up-build:
-	docker-compose $(COMPOSE_FILES) up --build
+	docker-compose $(COMPOSE_FILES) up --build &
+	cd frontend && npm run dev
 
 down:
 	docker-compose $(COMPOSE_FILES) down

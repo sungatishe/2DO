@@ -60,7 +60,7 @@ func (a *AuthService) Register(ctx context.Context, req *proto.RegisterRequest) 
 	}
 
 	event := events.UserRegisteredEvent{
-		UserID:   user.ID,
+		UserID:   uint(user.ID),
 		Username: user.Username,
 		Email:    user.Email,
 	}
@@ -86,7 +86,7 @@ func (a *AuthService) Login(ctx context.Context, req *proto.LoginRequest) (*prot
 		return nil, err
 	}
 
-	token, err := utils.GenerateJWT(user.ID)
+	token, err := utils.GenerateJWT(uint(user.ID))
 	if err != nil {
 		return nil, err
 	}

@@ -29,6 +29,6 @@ func (m *MockAuthClient) Logout(ctx context.Context, req *auth.LogOutRequest, op
 }
 
 func (m *MockAuthClient) ValidateToken(ctx context.Context, req *auth.ValidateTokenRequest, opts ...grpc.CallOption) (*auth.ValidateTokenResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	args := m.Called(ctx, req)
+	return args.Get(0).(*auth.ValidateTokenResponse), args.Error(1)
 }

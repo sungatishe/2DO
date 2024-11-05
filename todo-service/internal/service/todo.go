@@ -25,7 +25,7 @@ func (s *todoService) CreateTodo(ctx context.Context, req *proto.CreateTodoReque
 	}
 
 	todo := &models.Todo{
-		UserID:      uint(req.UserId),
+		UserID:      req.UserId,
 		Title:       req.Title,
 		Description: req.Description,
 		IsDone:      req.IsDone,
@@ -52,7 +52,7 @@ func (s *todoService) CreateTodo(ctx context.Context, req *proto.CreateTodoReque
 }
 
 func (s *todoService) GetTodoById(ctx context.Context, req *proto.GetTodosByIdRequest) (*proto.GetTodosByIdResponse, error) {
-	todo, err := s.repo.GetTodoById(uint(req.Id))
+	todo, err := s.repo.GetTodoById(req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (s *todoService) GetTodoById(ctx context.Context, req *proto.GetTodosByIdRe
 }
 
 func (s *todoService) UpdateTodo(ctx context.Context, req *proto.UpdateTodoRequest) (*proto.UpdateTodoResponse, error) {
-	todo, err := s.repo.GetTodoById(uint(req.Id))
+	todo, err := s.repo.GetTodoById(req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -82,8 +82,8 @@ func (s *todoService) UpdateTodo(ctx context.Context, req *proto.UpdateTodoReque
 	}
 
 	return &proto.UpdateTodoResponse{Todo: &proto.Todo{
-		Id:          uint64(todo.ID),
-		UserId:      uint64(todo.UserID),
+		Id:          todo.ID,
+		UserId:      todo.UserID,
 		Title:       todo.Title,
 		Description: todo.Description,
 		IsDone:      todo.IsDone,
@@ -92,7 +92,7 @@ func (s *todoService) UpdateTodo(ctx context.Context, req *proto.UpdateTodoReque
 }
 
 func (s *todoService) DeleteTodo(ctx context.Context, req *proto.DeleteTodoRequest) (*proto.DeleteTodoResponse, error) {
-	err := s.repo.DeleteTodoById(uint(req.Id))
+	err := s.repo.DeleteTodoById(req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (s *todoService) DeleteTodo(ctx context.Context, req *proto.DeleteTodoReque
 }
 
 func (s *todoService) ListTodo(ctx context.Context, req *proto.ListTodoRequest) (*proto.ListTodoResponse, error) {
-	todos, err := s.repo.ListTodoByUserId(uint(req.UserId))
+	todos, err := s.repo.ListTodoByUserId(req.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +130,8 @@ func (s *todoService) GetTodosByDeadline(ctx context.Context, req *proto.GetTodo
 	var todoList []*proto.Todo
 	for _, todo := range todos {
 		todoList = append(todoList, &proto.Todo{
-			Id:          uint64(todo.ID),
-			UserId:      uint64(todo.UserID),
+			Id:          todo.ID,
+			UserId:      todo.UserID,
 			Title:       todo.Title,
 			Description: todo.Description,
 			IsDone:      todo.IsDone,

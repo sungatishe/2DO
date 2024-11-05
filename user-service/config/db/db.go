@@ -1,20 +1,39 @@
 package db
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"database/sql"
+	"fmt"
+	_ "github.com/lib/pq"
 	"os"
-	"user-service/internal/models"
 )
 
-var DB *gorm.DB
+var DB *sql.DB
 
 func InitDB() {
 	dsn := os.Getenv("dsn")
 	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	DB, err = sql.Open("postgres", dsn)
 	if err != nil {
-		panic("Failed to connect db ")
+		panic("Failed to connect db")
 	}
-	DB.AutoMigrate(&models.User{})
+
+	err = DB.Ping()
+	if err != nil {
+		panic("Failed to ping db")
+	}
+
+	createTableQuery := `
+		CREATE TABLE IF NOT EXISTS users (
+		    id serial PRIMARY KEY,
+		    username VARCHAR(255) NOT NULL,
+		    email VARCHAR(255) NOT NULL UNIQUE,
+		    avatar TEXT,
+		    description TEXT
+		);
+	`
+
+	_, err = DB.Exec(createTableQuery)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to create a users table: %v", err))
+	}
 }

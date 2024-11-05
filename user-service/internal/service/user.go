@@ -32,7 +32,7 @@ func (u userService) CreateUser(ctx context.Context, req *proto.CreateUserReques
 	return &proto.CreateUserResponse{
 		Message: "User created successfully",
 		User: &proto.User{
-			Id:          uint64(user.ID),
+			Id:          user.ID,
 			Username:    user.Username,
 			Email:       user.Email,
 			Description: user.Description,
@@ -48,7 +48,7 @@ func (u userService) GetUserById(ctx context.Context, req *proto.GetUserByIdRequ
 	}
 
 	return &proto.GetUserByIdResponse{User: &proto.User{
-		Id:          uint64(user.ID),
+		Id:          user.ID,
 		Username:    user.Username,
 		Email:       user.Email,
 		Description: user.Description,

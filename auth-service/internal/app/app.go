@@ -18,6 +18,6 @@ func Run() {
 
 	rabbitmq.DeclareQueue(ch, "userQueue")
 
-	authRepo := repository.NewAuthRepository(db.Db)
+	authRepo := repository.NewAuthRepository(db.DB)
 	server.InitGRPCServer(":50051", ch, authRepo)
 }

@@ -14,7 +14,7 @@ func (m *MockTodoRepository) CreateTodo(todo *models.Todo) error {
 	return args.Error(0)
 }
 
-func (m *MockTodoRepository) GetTodoById(id uint) (*models.Todo, error) {
+func (m *MockTodoRepository) GetTodoById(id uint64) (*models.Todo, error) {
 	args := m.Called(id)
 	return args.Get(0).(*models.Todo), args.Error(1)
 }
@@ -24,12 +24,12 @@ func (m *MockTodoRepository) UpdateTodo(todo *models.Todo) error {
 	return args.Error(0)
 }
 
-func (m *MockTodoRepository) DeleteTodoById(id uint) error {
+func (m *MockTodoRepository) DeleteTodoById(id uint64) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
 
-func (m *MockTodoRepository) ListTodoByUserId(id uint) ([]models.Todo, error) {
+func (m *MockTodoRepository) ListTodoByUserId(id uint64) ([]models.Todo, error) {
 	args := m.Called(id)
 	return args.Get(0).([]models.Todo), args.Error(1)
 }

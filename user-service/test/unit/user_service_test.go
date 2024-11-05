@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 	"testing"
 	"user-service/internal/models"
 	"user-service/internal/proto"
@@ -41,7 +40,7 @@ func (u *TestUserService) TestGetUserById(t *testing.T) {
 	userService := service.NewUserService(u.mockRepo)
 
 	user := models.User{
-		Model:       gorm.Model{ID: 1},
+		ID:          1,
 		Username:    "test",
 		Email:       "test@test.com",
 		Avatar:      "avatar.jpg",
@@ -63,7 +62,7 @@ func (u *TestUserService) TestUpdateUser(t *testing.T) {
 	userService := service.NewUserService(u.mockRepo)
 
 	user := models.User{
-		Model:       gorm.Model{ID: 1},
+		ID:          1,
 		Username:    "test",
 		Email:       "test@test.com",
 		Avatar:      "avatar.jpg",
